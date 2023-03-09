@@ -9,12 +9,25 @@ public class Item : MonoBehaviour
     };
     public Type type;
     public int value;
+    Rigidbody rigid;
+    SphereCollider coll;
 
-
- 
+    void Awake()
+    {
+        rigid = GetComponent<Rigidbody>();
+        coll = GetComponent<SphereCollider>();
+    }
     // Update is called once per frame
     void Update()
     {
         transform.Rotate(Vector3.up * 20 * Time.deltaTime);
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            rigid.isKinematic = true;
+            coll.enabled = false;
+        }
     }
 }

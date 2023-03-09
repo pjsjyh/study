@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 32015878351589412}
   - component: {fileID: 2520237393541430058}
   - component: {fileID: 8268434161928445900}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Bullet Case
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 1274162172388555889}
   - component: {fileID: 5328681680414570923}
   - component: {fileID: 5029619720324965031}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Mesh Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}

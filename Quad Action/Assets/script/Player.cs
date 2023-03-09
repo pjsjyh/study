@@ -12,6 +12,9 @@ public class Player : MonoBehaviour
     public bool[] hasWeapons;
     public GameObject[] grenades;
     public int HasGrenade;
+    public GameObject grenadeObj;
+    public Camera followCamera;
+
 
     public int Ammo;
     public int Coin;
@@ -30,6 +33,7 @@ public class Player : MonoBehaviour
 
     bool iDown;
     bool fDown;
+    bool gDown;
     bool rDown;
 
     bool sDown1;
@@ -37,11 +41,15 @@ public class Player : MonoBehaviour
     bool sDown3;
     bool isSwap;
     bool isFireReady = true;
-    
+    bool isBoarder;
+    bool isDamage=false;
+
     Vector3 moveVec;
     Vector3 dodgeVec;
     Animator anim;
     Rigidbody rigid;
+    MeshRenderer[] meshs;
+
     GameObject nearObject;
     Weapon equipWeapon;
     int equipWeaponIndex=-1;
@@ -51,6 +59,7 @@ public class Player : MonoBehaviour
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        meshs = GetComponentsInChildren<MeshRenderer>();
     }
 
     // Update is called once per frame
@@ -60,6 +69,7 @@ public class Player : MonoBehaviour
         Move();
         Turn();
         Jump();
+        Grenade();
         Attack();
         Reload();
         Dodge();
@@ -75,6 +85,7 @@ public class Player : MonoBehaviour
         jDown = Input.GetButtonDown("Jump");
         fDown = Input.GetButton("Fire1");
         rDown = Input.GetButtonDown("Reload");
+        gDown = Input.GetButtonDown("Fire2");
         iDown = Input.GetButtonDown("Interation");
         sDown1 = Input.GetButtonDown("Swap1");
         sDown2 = Input.GetButtonDown("Swap2");
@@ -87,10 +98,11 @@ public class Player : MonoBehaviour
             moveVec = dodgeVec;
         if (isSwap || !isFireReady|| isReload)
             moveVec = Vector3.zero;
-        if (wDown)
-            transform.position += moveVec * speed * 0.3f * Time.deltaTime;
-        else
-            transform.position += moveVec * speed * Time.deltaTime;
+        if(!isBoarder)
+            transform.position+=moveVec*speed*(wDown ? 0.3f:1f)*Time.deltaTime;
+
+
+
         anim.SetBool("isRun", moveVec != Vector3.zero);
         anim.SetBool("isWalk", wDown);
     }
@@ -98,6 +110,18 @@ public class Player : MonoBehaviour
     {
         transform.LookAt(transform.position + moveVec);
 
+        if (fDown)
+        {
+            Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit rayHit;
+            if (Physics.Raycast(ray, out rayHit, 100))
+            {
+                Vector3 nextVec = rayHit.point - transform.position;
+                nextVec.y = 0;
+                transform.LookAt(transform.position + nextVec);
+            }
+        }
+        
     }
     void Jump()
     {
@@ -107,6 +131,29 @@ public class Player : MonoBehaviour
             anim.SetBool("isJump", true);
             anim.SetTrigger("doJump");
             isJump = true;
+        }
+    }
+    void Grenade()
+    {
+        if (HasGrenade == 0)
+            return;
+        if (gDown && !isReload && !isSwap)
+        {
+            Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit rayHit;
+            if (Physics.Raycast(ray, out rayHit, 100))
+            {
+                Vector3 nextVec = rayHit.point - transform.position;
+                nextVec.y = 10;
+
+                GameObject instantGrenade = Instantiate(grenadeObj, transform.position, transform.rotation);
+                Rigidbody rigidGrenade = instantGrenade.GetComponent<Rigidbody>();
+                rigidGrenade.AddForce(nextVec, ForceMode.Impulse);
+                rigidGrenade.AddTorque(Vector3.back * 10, ForceMode.Impulse);
+
+                HasGrenade -= 1;
+                grenades[HasGrenade].SetActive(false);
+            }
         }
     }
     void Attack()
@@ -209,6 +256,20 @@ public class Player : MonoBehaviour
             }
         }
     }
+    void FreezeRotation()
+    {
+        rigid.angularVelocity = Vector3.zero;  //항상 회전0 만들어줌
+    }
+    void StopToWall()
+    {
+        Debug.DrawRay(transform.position, transform.forward * 5, Color.green);
+        isBoarder = Physics.Raycast(transform.position, transform.forward, 5, LayerMask.GetMask("Wall"));
+    }
+    void FixedUpdate()
+    {
+        FreezeRotation();
+        StopToWall();
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -261,7 +322,30 @@ public class Player : MonoBehaviour
             }
             Destroy(other.gameObject);
         }
+        else if (other.tag == "EnemyBullet")
+        {
+            if (!isDamage)
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                Health -= enemyBullet.damage;
+                StartCoroutine(OnDamage());
+            }
+            
+        }
     }
-
+    IEnumerator OnDamage()
+    {
+        isDamage = true;
+        foreach(MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.yellow;
+        }
+        yield return new WaitForSeconds(1f);
+        isDamage = false;
+        foreach (MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.white;
+        }
+    }
 
 }
