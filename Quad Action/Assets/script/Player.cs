@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     public int Ammo;
     public int Coin;
     public int Health;
+    public int score;
 
     public int maxAmmo;
     public int maxCoin;
@@ -51,15 +52,17 @@ public class Player : MonoBehaviour
     MeshRenderer[] meshs;
 
     GameObject nearObject;
-    Weapon equipWeapon;
+    public Weapon equipWeapon;
     int equipWeaponIndex=-1;
     float fireDelay;
 
-    void Start()
+    void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
         meshs = GetComponentsInChildren<MeshRenderer>();
+
+        //PlayerPrefs.SetInt("MaxScore", 112500);
     }
 
     // Update is called once per frame
@@ -169,7 +172,6 @@ public class Player : MonoBehaviour
             anim.SetTrigger(equipWeapon.type==Weapon.Type.Melee ? "doSwing":"doShot");
             fireDelay = 0;
         }
-        
     }
     void Reload()
     {
@@ -246,6 +248,7 @@ public class Player : MonoBehaviour
     {
         if (iDown && nearObject != null && !isJump && !isDodge)
         {
+            Debug.Log("!");
             if (nearObject.tag == "Weapon")
             {
                 Item item = nearObject.GetComponent<Item>();
