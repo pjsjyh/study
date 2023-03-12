@@ -70,6 +70,7 @@
     <Compile Include="Assets\script\Orbit.cs" />
     <Compile Include="Assets\script\Player.cs" />
     <Compile Include="Assets\script\Shop.cs" />
+    <Compile Include="Assets\script\StartZone.cs" />
     <Compile Include="Assets\script\Weapon.cs" />
   </ItemGroup>
   <ItemGroup>

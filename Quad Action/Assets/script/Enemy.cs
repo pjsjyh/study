@@ -9,12 +9,15 @@ public class Enemy : MonoBehaviour
 
     public int maxHealth;
     public int curHealth;
+    public int score;
+    public GameManager manager;
     public Transform Target;
     public BoxCollider meleeArea;
     public bool isChase;
     public bool isAttack;
     public bool isDead;
     public GameObject bullet;
+    public GameObject[] coins;
 
     public Rigidbody rigid;
     public BoxCollider boxColloder;
@@ -179,6 +182,27 @@ public class Enemy : MonoBehaviour
             nav.enabled = false;
             anim.SetTrigger("doDie");
 
+            Player player = Target.GetComponent<Player>();
+            player.score += score;
+            int ranCoin = Random.Range(0, 3);
+            Instantiate(coins[ranCoin], transform.position, Quaternion.identity);
+
+            switch (enemyType)
+            {
+                case Type.A:
+                    manager.enemyCntA--;
+                    break;
+                case Type.B:
+                    manager.enemyCntB--;
+                    break;
+                case Type.C:
+                    manager.enemyCntC--;
+                    break;
+                case Type.D:
+                    manager.enemyCntD--;
+                    break;
+            }
+
             if (isGrenade)
             {
                 reactVec = reactVec.normalized;
@@ -193,8 +217,8 @@ public class Enemy : MonoBehaviour
                 reactVec += Vector3.up;
                 rigid.AddForce(reactVec * 5, ForceMode.Impulse);
             }
-            if(enemyType != Type.D)
-                Destroy(gameObject, 4);
+            
+            Destroy(gameObject, 4);
         }
     }
 }
