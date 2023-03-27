@@ -1,2 +1,3 @@
 Base path: 'E:/seminar/2019.4.29f1/Editor/Data', plugins path 'E:/seminar/2019.4.29f1/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
+Cmd: shutdown
